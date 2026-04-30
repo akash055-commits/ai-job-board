@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id               String      @id @default(cuid())
+  title            String
+  company          String
+  location         String?
+  description      String
+  applyLink        String
+  source           String
+  sourceLink       String?
+  datePosted       DateTime?
+  matchScore       Int
+  reasoning        String
+  summary          String?
+  roleType         String      @default("OTHER")
+  topMatch         Boolean     @default(false)
+  lowEffortHighFit Boolean     @default(false)
+  dedupeKey        String      @unique
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  action           UserAction?
+
+  @@index([matchScore])
+  @@index([source])
+  @@index([roleType])
+}
+
+model UserAction {
+  id            String   @id @default(cuid())
+  jobId         String            @unique
+  status        String   @default("NOT_APPLIED")
+  saved         Boolean           @default(false)
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  lastTouchedAt DateTime          @default(now())
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
